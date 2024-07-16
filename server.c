@@ -34,3 +34,33 @@ void handle_dns_request(int socket_fd) {
     printf("Sent DNS response\n");
 }
 
+int main() {
+    int socket_fd;
+    struct sockaddr_in server_address;
+
+    socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (socket_fd < 0) {
+        perror("Cannot create socket");
+        return 1;
+    }
+
+    memset(&server_address, 0, sizeof(server_address));
+    server_address.sin_family = AF_INET;
+    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_address.sin_port = htons(PORT);
+
+    if (bind(socket_fd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
+        perror("Bind failed");
+        close(socket_fd);
+        return 1;
+    }
+
+       printf("DNS Server listening on port %d\n", PORT);
+
+    while (1) {
+        handle_dns_request(socket_fd);
+    }
+
+    close(socket_fd);
+    return 0;
+}
